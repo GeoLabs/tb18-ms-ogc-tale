@@ -1,0 +1,43 @@
+#!/bin/bash
+
+LOCALDIR=~/.local
+BINDIR=$LOCALDIR/bin
+ETCDIR=$LOCALDIR/etc
+
+echo "****** PRINT VERSION 1 *******"
+cat /etc/os-release
+
+
+echo "****** STEP 1: Build MapServer *******"
+#git clone -b branch-8-0 https://github.com/MapServer/MapServer.git
+git clone https://github.com/GeoLabs/MapServer.git
+cd MapServer
+#git checkout cce7c950a1deaf895f7a3b7d28795d47c1a54e4a 
+mkdir build
+cd build
+cmake .. \
+       -DWITH_PYTHON=0 \
+       -DWITH_CLIENT_WMS=1 \
+       -DWITH_CLIENT_WFS=1 \
+       -DCMAKE_PREFIX_PATH=/usr/ \
+       -DWITH_KML=1 \
+       -DWITH_OGCAPI=1 \
+       -DPROTOBUF_INCLUDE_DIR=/usr/include/google//protobuf-c \
+       -DPROTOBUFC_LIBRARY=/usr/lib/x86_64-linux-gnu/libprotobuf-c.so \
+       -DPROTOBUF_COMPILER=/usr/bin/protoc-c \
+       -DPYTHON_INCLUDE_DIRS=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")  \
+       -DPYTHON_LIBRARY=$(python -c "import distutils.sysconfig as sysconfig; print(sysconfig.get_config_var('LIBDIR'))") \
+       -DCMAKE_INSTALL_PREFIX=$LOCALDIR
+make -j 10
+make install
+cp -r ../share/ogcapi/templates ~/.local/
+#find $LOCALDIR
+sed "s:/opt/mapserver:/WholeTale/workspace/MapServer/ms-ogc-workshop/service:g" -i ~jovyan/.local/etc/mapserver-sample.conf
+
+
+mkdir $LOCALDIR/cgi-bin
+cp $LOCALDIR/bin/* $LOCALDIR/cgi-bin/
+
+pip install display_xml panel opencv-python folium matplotlib geopandas geojson earthpy
+
+jupyter labextension install @pyviz/jupyterlab_pyviz
