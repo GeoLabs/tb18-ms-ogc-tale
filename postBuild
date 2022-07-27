@@ -38,6 +38,4 @@ sed "s:/opt/mapserver:/WholeTale/workspace/MapServer/ms-ogc-workshop/service:g" 
 mkdir $LOCALDIR/cgi-bin
 cp $LOCALDIR/bin/* $LOCALDIR/cgi-bin/
 
-pip install display_xml panel opencv-python folium matplotlib geopandas geojson earthpy
-
 jupyter labextension install @pyviz/jupyterlab_pyviz
